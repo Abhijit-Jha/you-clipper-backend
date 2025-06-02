@@ -20,6 +20,11 @@ module.exports = {
         name: "trimWorker",
         script: "dist/workers/trimWorker.js",  // Worker file (compiled)
         watch: false,
+      },
+      {
+        name: "qualityWorker",
+        script: "dist/workers/qualityWorker.js",  // Worker file (compiled)
+        watch: false,
       }
     ]
   }

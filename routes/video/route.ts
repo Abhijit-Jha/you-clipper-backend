@@ -1,6 +1,6 @@
 import express, { Request, Response } from "express";
 import cors from "cors";
-import { combineQueue, downloadQueue, trimQueue } from "../../utils/queue/queue";
+import { combineQueue, downloadQueue, qualityQueue, trimQueue } from "../../utils/queue/queue";
 import fs from 'fs'
 import path from "path";
 export const videoRouter = express.Router();
@@ -106,4 +106,29 @@ videoRouter.get('/trimStatus/:jobId', async (req, res) => {
     const progress = job.progress;
 
     res.json({ id: job.id, state, progress });
+});
+
+//After trimming happens, the user will choose the quality he needs, we just have to fulfill it and at last download starts
+// /quality?aspectRatio=squared&quality=144p
+// {trimmedVideoPath,videoId}
+
+videoRouter.post('/quality', async (req: Request, res: Response) => {
+    const { trimmedVideoPath, videoId } = req.body;
+    const { resolution, aspectRatio } = req.query as { resolution?: string; aspectRatio?: string };
+
+    if (!trimmedVideoPath || !videoId) {
+        res.status(400).json({ error: 'trimmedVideoPath and videoId are required' });
+    }
+
+    if (!resolution || !aspectRatio) {
+        res.status(400).json({ error: 'resolution and aspectRatio are required query parameters' });
+    }
+
+    try {
+        const job = await qualityQueue.add('change-quality', { resolution, aspectRatio, trimmedVideoPath, videoId });
+        res.json({ jobId: job.id });
+    } catch (error) {
+        console.error('❌ Failed to enqueue quality job:', error);
+        res.status(500).json({ error: 'Failed to enqueue job' });
+    }
 });

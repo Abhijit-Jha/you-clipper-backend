@@ -32,11 +32,12 @@ var Resolution;
     Resolution[Resolution["P360"] = 360] = "P360";
     Resolution[Resolution["P144"] = 144] = "P144";
 })(Resolution || (Resolution = {}));
-function qualityVideo(resolution, aspectRatio) {
+function qualityVideo(resolution, aspectRatio, trimmedVideoPath, videoId) {
     return __awaiter(this, void 0, void 0, function* () {
         const currentPath = path_1.default.resolve();
-        const inputPath = path_1.default.join(currentPath, 'videos', 'trimmedVideo.mp4'); // include extension
-        const outputPath = path_1.default.join(currentPath, 'videos', `final-${resolution}.mp4`);
+        const inputPath = path_1.default.join(currentPath, trimmedVideoPath); // include extension
+        const outputPath = path_1.default.join(currentPath, 'videos', videoId, `${videoId}-${resolution}-${aspectRatio}.mp4`);
+        const opPath = `${videoId}/${videoId}-${resolution}-${aspectRatio}.mp4`; //To return to frontend
         // Check if resolution is valid
         if (!qualityMap_1.qualityMap[resolution]) {
             throw new Error(`❌ Resolution "${resolution}" is not supported.`);
@@ -65,7 +66,7 @@ function qualityVideo(resolution, aspectRatio) {
             })
                 .on('end', () => {
                 console.log('✅ Video processing done');
-                resolve(outputPath);
+                resolve(opPath);
             })
                 .on('error', (err) => {
                 console.error('❌ ffmpeg error:', err.message);

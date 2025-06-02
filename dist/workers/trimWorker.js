@@ -32,6 +32,9 @@ const worker = new bullmq_1.Worker('trim-video', (job) => __awaiter(void 0, void
             combinedVideoPath: job.data.combinedVideoPath,
             videoId: job.data.videoId
         });
+        yield job.updateProgress({
+            trimmedVideoPath: outputPath
+        });
     }
     catch (error) {
         console.error(`Job ${job.id} failed:`, error);

@@ -19,10 +19,11 @@ enum Resolution {
   P144 = 144,
 }
 
-export async function qualityVideo(resolution: keyof typeof qualityMap, aspectRatio: keyof typeof aspectRatioMap): Promise<string> {
+export async function qualityVideo(resolution: keyof typeof qualityMap, aspectRatio: keyof typeof aspectRatioMap, trimmedVideoPath: string,videoId:string): Promise<string> {
   const currentPath = path.resolve();
-  const inputPath = path.join(currentPath, 'videos', 'trimmedVideo.mp4');  // include extension
-  const outputPath = path.join(currentPath, 'videos', `final-${resolution}.mp4`);
+  const inputPath = path.join(currentPath, trimmedVideoPath);  // include extension
+  const outputPath = path.join(currentPath, 'videos', videoId,`${videoId}-${resolution}-${aspectRatio}.mp4`);
+  const opPath = `${videoId}/${videoId}-${resolution}-${aspectRatio}.mp4`; //To return to frontend
 
   // Check if resolution is valid
   if (!qualityMap[resolution]) {
@@ -53,7 +54,7 @@ export async function qualityVideo(resolution: keyof typeof qualityMap, aspectRa
       })
       .on('end', () => {
         console.log('✅ Video processing done');
-        resolve(outputPath);
+        resolve(opPath);
       })
       .on('error', (err) => {
         console.error('❌ ffmpeg error:', err.message);

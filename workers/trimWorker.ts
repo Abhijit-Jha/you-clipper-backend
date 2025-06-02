@@ -23,8 +23,12 @@ const worker = new Worker(
                 startTime: job.data.startTime,
                 endTime: job.data.endTime,
                 combinedVideoPath: job.data.combinedVideoPath,
-                videoId : job.data.videoId
+                videoId: job.data.videoId
             });
+
+            await job.updateProgress({
+                trimmedVideoPath: outputPath
+            })
         } catch (error) {
             console.error(`Job ${job.id} failed:`, error);
             throw error;

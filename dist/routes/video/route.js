@@ -101,3 +101,24 @@ exports.videoRouter.get('/trimStatus/:jobId', (req, res) => __awaiter(void 0, vo
     const progress = job.progress;
     res.json({ id: job.id, state, progress });
 }));
+//After trimming happens, the user will choose the quality he needs, we just have to fulfill it and at last download starts
+// /quality?aspectRatio=squared&quality=144p
+// {trimmedVideoPath,videoId}
+exports.videoRouter.post('/quality', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { trimmedVideoPath, videoId } = req.body;
+    const { resolution, aspectRatio } = req.query;
+    if (!trimmedVideoPath || !videoId) {
+        res.status(400).json({ error: 'trimmedVideoPath and videoId are required' });
+    }
+    if (!resolution || !aspectRatio) {
+        res.status(400).json({ error: 'resolution and aspectRatio are required query parameters' });
+    }
+    try {
+        const job = yield queue_1.qualityQueue.add('change-quality', { resolution, aspectRatio, trimmedVideoPath, videoId });
+        res.json({ jobId: job.id });
+    }
+    catch (error) {
+        console.error('❌ Failed to enqueue quality job:', error);
+        res.status(500).json({ error: 'Failed to enqueue job' });
+    }
+}));

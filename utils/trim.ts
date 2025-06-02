@@ -11,10 +11,10 @@ export async function trimVideo({ startTime, endTime, combinedVideoPath, videoId
   const endTimeInSec = convertToSeconds(endTime)
   const duration = endTimeInSec - startTimeInSec;
   const currentPath = path.resolve();
-  console.log(combinedVideoPath , "Is the path recieced from frontend")
+  console.log(combinedVideoPath, "Is the path recieced from frontend")
   const inputPath = path.join(currentPath, combinedVideoPath);
   const outputPath = path.join(currentPath, 'videos', videoId, `${videoId}-s${startTimeInSec}-e${endTimeInSec}-trimmed.mp4`);
-
+  const opPath = `videos/${videoId}/${videoId}-s${startTimeInSec}-e${endTimeInSec}-trimmed.mp4`
   // Check if output file exists
   try {
     await fs.access(outputPath);
