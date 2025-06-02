@@ -21,10 +21,14 @@ const ffmpeg_static_1 = __importDefault(require("ffmpeg-static"));
 if (ffmpeg_static_1.default)
     fluent_ffmpeg_1.default.setFfmpegPath(ffmpeg_static_1.default);
 function trimVideo(_a) {
-    return __awaiter(this, arguments, void 0, function* ({ startTime, endTime }) {
+    return __awaiter(this, arguments, void 0, function* ({ startTime, endTime, combinedVideoPath, videoId }) {
+        const startTimeInSec = (0, convertToSeconds_1.convertToSeconds)(startTime);
+        const endTimeInSec = (0, convertToSeconds_1.convertToSeconds)(endTime);
+        const duration = endTimeInSec - startTimeInSec;
         const currentPath = path_1.default.resolve();
-        const inputPath = path_1.default.join(currentPath, 'videos', 'combined.mp4');
-        const outputPath = path_1.default.join(currentPath, 'videos', 'trimmedVideo.mp4');
+        console.log(combinedVideoPath, "Is the path recieced from frontend");
+        const inputPath = path_1.default.join(currentPath, combinedVideoPath);
+        const outputPath = path_1.default.join(currentPath, 'videos', videoId, `${videoId}-s${startTimeInSec}-e${endTimeInSec}-trimmed.mp4`);
         // Check if output file exists
         try {
             yield promises_1.default.access(outputPath);
@@ -40,7 +44,6 @@ function trimVideo(_a) {
         catch (_b) {
             // File doesn't exist, proceed with trimming
         }
-        const duration = (0, convertToSeconds_1.convertToSeconds)(endTime) - (0, convertToSeconds_1.convertToSeconds)(startTime);
         return new Promise((resolve, reject) => {
             (0, fluent_ffmpeg_1.default)(inputPath)
                 .setStartTime(startTime)

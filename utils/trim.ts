@@ -6,10 +6,14 @@ import ffmpegPath from 'ffmpeg-static';
 
 if (ffmpegPath) ffmpeg.setFfmpegPath(ffmpegPath);
 
-export async function trimVideo({ startTime, endTime }: { startTime: string; endTime: string }): Promise<string> {
+export async function trimVideo({ startTime, endTime, combinedVideoPath, videoId }: { startTime: string; endTime: string, combinedVideoPath: string, videoId: string }): Promise<string> {
+  const startTimeInSec = convertToSeconds(startTime);
+  const endTimeInSec = convertToSeconds(endTime)
+  const duration = endTimeInSec - startTimeInSec;
   const currentPath = path.resolve();
-  const inputPath = path.join(currentPath, 'videos', 'combined.mp4');
-  const outputPath = path.join(currentPath, 'videos', 'trimmedVideo.mp4');
+  console.log(combinedVideoPath , "Is the path recieced from frontend")
+  const inputPath = path.join(currentPath, combinedVideoPath);
+  const outputPath = path.join(currentPath, 'videos', videoId, `${videoId}-s${startTimeInSec}-e${endTimeInSec}-trimmed.mp4`);
 
   // Check if output file exists
   try {
@@ -26,7 +30,6 @@ export async function trimVideo({ startTime, endTime }: { startTime: string; end
     // File doesn't exist, proceed with trimming
   }
 
-  const duration = convertToSeconds(endTime) - convertToSeconds(startTime);
 
   return new Promise((resolve, reject) => {
     ffmpeg(inputPath)

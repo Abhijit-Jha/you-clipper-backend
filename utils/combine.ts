@@ -8,12 +8,12 @@ if (!ffmpegPath) {
   throw new Error('❌ ffmpeg binary not found!');
 }
 ffmpeg.setFfmpegPath(ffmpegPath);
-
-export async function combineVideo(): Promise<boolean> {
+interface combineOutputType{
+  outputPath : string
+}
+export async function combineVideo({videoPath,audioPath,videoId}:{videoPath :string,audioPath:string,videoId : string}): Promise<combineOutputType> {
   const currentPath = path.resolve();
-  const audioPath = path.join(currentPath, 'videos', 'output.f258.m4a');
-  const videoPath = path.join(currentPath, 'videos', 'output.f401.mp4');
-  const outputPath = path.join(currentPath, 'videos', 'combined.mp4');
+  const outputPath = path.join(currentPath, 'videos',`${videoId}`, `combined-${videoId}.mp4`);
 
   // ✅ Check if input files exist
   if (!fs.existsSync(audioPath)) throw new Error('❌ Audio file not found');
@@ -23,13 +23,15 @@ export async function combineVideo(): Promise<boolean> {
     ffmpeg()
       .input(videoPath)
       .input(audioPath)
-      .outputOptions(['-c:v copy', '-c:a aac']) // video copied, audio safely encoded
+      .outputOptions(['-c:v copy', '-c:a aac']) 
       .on('start', commandLine => {
         console.log('🎬 FFmpeg started:', commandLine);
       })
       .on('end', () => {
         console.log('✅ Combined video + audio into:', outputPath);
-        resolve(true);
+        resolve({
+          outputPath : `videos/${videoId}/combined-${videoId}.mp4`
+        });
       })
       .on('error', (err) => {
         console.error('❌ FFmpeg error:', err.message);

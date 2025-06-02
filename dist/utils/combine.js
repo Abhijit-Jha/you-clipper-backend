@@ -22,12 +22,10 @@ if (!ffmpeg_static_1.default) {
     throw new Error('❌ ffmpeg binary not found!');
 }
 fluent_ffmpeg_1.default.setFfmpegPath(ffmpeg_static_1.default);
-function combineVideo() {
-    return __awaiter(this, void 0, void 0, function* () {
+function combineVideo(_a) {
+    return __awaiter(this, arguments, void 0, function* ({ videoPath, audioPath, videoId }) {
         const currentPath = path_1.default.resolve();
-        const audioPath = path_1.default.join(currentPath, 'videos', 'output.f258.m4a');
-        const videoPath = path_1.default.join(currentPath, 'videos', 'output.f401.mp4');
-        const outputPath = path_1.default.join(currentPath, 'videos', 'combined.mp4');
+        const outputPath = path_1.default.join(currentPath, 'videos', `${videoId}`, `combined-${videoId}.mp4`);
         // ✅ Check if input files exist
         if (!fs_1.default.existsSync(audioPath))
             throw new Error('❌ Audio file not found');
@@ -37,13 +35,15 @@ function combineVideo() {
             (0, fluent_ffmpeg_1.default)()
                 .input(videoPath)
                 .input(audioPath)
-                .outputOptions(['-c:v copy', '-c:a aac']) // video copied, audio safely encoded
+                .outputOptions(['-c:v copy', '-c:a aac'])
                 .on('start', commandLine => {
                 console.log('🎬 FFmpeg started:', commandLine);
             })
                 .on('end', () => {
                 console.log('✅ Combined video + audio into:', outputPath);
-                resolve(true);
+                resolve({
+                    outputPath: `videos/${videoId}/combined-${videoId}.mp4`
+                });
             })
                 .on('error', (err) => {
                 console.error('❌ FFmpeg error:', err.message);
