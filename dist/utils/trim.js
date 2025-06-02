@@ -29,6 +29,7 @@ function trimVideo(_a) {
         console.log(combinedVideoPath, "Is the path recieced from frontend");
         const inputPath = path_1.default.join(currentPath, combinedVideoPath);
         const outputPath = path_1.default.join(currentPath, 'videos', videoId, `${videoId}-s${startTimeInSec}-e${endTimeInSec}-trimmed.mp4`);
+        const opPath = `videos/${videoId}/${videoId}-s${startTimeInSec}-e${endTimeInSec}-trimmed.mp4`;
         // Check if output file exists
         try {
             yield promises_1.default.access(outputPath);

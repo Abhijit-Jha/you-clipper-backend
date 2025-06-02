@@ -19,57 +19,58 @@ const ffmpeg_static_1 = __importDefault(require("ffmpeg-static"));
 const path_1 = __importDefault(require("path"));
 const qualityMap_1 = require("../helper/qualityMap");
 const aspectRatioMap_1 = require("../helper/aspectRatioMap");
-// Safety check for ffmpeg binary
 if (!ffmpeg_static_1.default) {
     throw new Error('❌ ffmpeg binary not found!');
 }
 fluent_ffmpeg_1.default.setFfmpegPath(ffmpeg_static_1.default);
-var Resolution;
-(function (Resolution) {
-    Resolution[Resolution["P1080"] = 1080] = "P1080";
-    Resolution[Resolution["P720"] = 720] = "P720";
-    Resolution[Resolution["P480"] = 480] = "P480";
-    Resolution[Resolution["P360"] = 360] = "P360";
-    Resolution[Resolution["P144"] = 144] = "P144";
-})(Resolution || (Resolution = {}));
+// Utility: Converts "16:9" -> { w: 16, h: 9 }
+function parseAspectRatio(ratio) {
+    const [w, h] = ratio.split(':').map(Number);
+    return { w, h };
+}
 function qualityVideo(resolution, aspectRatio, trimmedVideoPath, videoId) {
     return __awaiter(this, void 0, void 0, function* () {
         const currentPath = path_1.default.resolve();
-        const inputPath = path_1.default.join(currentPath, trimmedVideoPath); // include extension
+        const inputPath = path_1.default.join(currentPath, trimmedVideoPath);
         const outputPath = path_1.default.join(currentPath, 'videos', videoId, `${videoId}-${resolution}-${aspectRatio}.mp4`);
-        const opPath = `${videoId}/${videoId}-${resolution}-${aspectRatio}.mp4`; //To return to frontend
-        // Check if resolution is valid
+        const opPath = `${videoId}/${videoId}-${resolution}-${aspectRatio}.mp4`;
         if (!qualityMap_1.qualityMap[resolution]) {
             throw new Error(`❌ Resolution "${resolution}" is not supported.`);
         }
-        // Check if input file exists
+        if (!aspectRatioMap_1.aspectRatioMap[aspectRatio]) {
+            throw new Error(`❌ Aspect ratio "${aspectRatio}" is not supported.`);
+        }
         if (!fs_1.default.existsSync(inputPath)) {
             throw new Error(`❌ Input file not found at ${inputPath}`);
         }
+        // Extract width and height from resolution
+        const [targetWidth, targetHeight] = qualityMap_1.qualityMap[resolution].split('x').map(Number);
+        const { w: arW, h: arH } = parseAspectRatio(aspectRatioMap_1.aspectRatioMap[aspectRatio]);
+        // Compute aspect-correct crop values
+        const targetAR = arW / arH;
+        const scaledCropWidth = Math.floor(targetHeight * targetAR);
+        const cropWidth = Math.min(scaledCropWidth, targetWidth);
+        const cropHeight = Math.floor(cropWidth / targetAR);
+        const cropX = Math.floor((targetWidth - cropWidth) / 2);
+        const cropY = Math.floor((targetHeight - cropHeight) / 2);
+        const vfFilter = `scale=${targetWidth}:${targetHeight},crop=${cropWidth}:${cropHeight}:${cropX}:${cropY}`;
         return new Promise((resolve, reject) => {
             (0, fluent_ffmpeg_1.default)(inputPath)
-                //does not confirms
-                // .size(qualityMap[resolution])
-                // .outputOptions('-aspect', aspectRatioMap[aspectRatio])
-                //Force fully doing it
-                .outputOptions([
-                `-vf scale=${qualityMap_1.qualityMap[resolution]}`, // Forces frame resize
-                `-aspect ${aspectRatioMap_1.aspectRatioMap[aspectRatio]}` // Sets display aspect
-            ])
+                .outputOptions([`-vf ${vfFilter}`])
                 .output(outputPath)
+                .on('start', (cmd) => {
+                console.log('🔧 FFmpeg started with command:', cmd);
+            })
                 .on('progress', (p) => {
                 var _a;
-                console.log(`Progress: ${(_a = p.percent) === null || _a === void 0 ? void 0 : _a.toFixed(2)}%, Size: ${p.targetSize}KB, FPS: ${p.currentFps}`);
-            })
-                .on('start', (command) => {
-                console.log('Started ffmpeg with command:', command);
+                console.log(`⏳ Progress: ${(_a = p.percent) === null || _a === void 0 ? void 0 : _a.toFixed(2)}%`);
             })
                 .on('end', () => {
                 console.log('✅ Video processing done');
                 resolve(opPath);
             })
                 .on('error', (err) => {
-                console.error('❌ ffmpeg error:', err.message);
+                console.error('❌ FFmpeg error:', err.message);
                 reject(err);
             })
                 .run();
