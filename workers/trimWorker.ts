@@ -25,7 +25,7 @@ const worker = new Worker(
                 combinedVideoPath: job.data.combinedVideoPath,
                 videoId: job.data.videoId
             });
-
+            console.error("TrimmedvideoPath",outputPath);
             await job.updateProgress({
                 trimmedVideoPath: outputPath
             })
@@ -37,7 +37,7 @@ const worker = new Worker(
     {
         connection
     }
-);
+);  
 
 
 

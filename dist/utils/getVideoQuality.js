@@ -31,7 +31,7 @@ function parseAspectRatio(ratio) {
 function qualityVideo(resolution, aspectRatio, trimmedVideoPath, videoId) {
     return __awaiter(this, void 0, void 0, function* () {
         const currentPath = path_1.default.resolve();
-        const inputPath = path_1.default.join(currentPath, trimmedVideoPath);
+        const inputPath = path_1.default.isAbsolute(trimmedVideoPath) ? trimmedVideoPath : path_1.default.join(currentPath, trimmedVideoPath);
         const outputPath = path_1.default.join(currentPath, 'videos', videoId, `${videoId}-${resolution}-${aspectRatio}.mp4`);
         const opPath = `${videoId}/${videoId}-${resolution}-${aspectRatio}.mp4`;
         if (!qualityMap_1.qualityMap[resolution]) {

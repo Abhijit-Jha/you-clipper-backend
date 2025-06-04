@@ -2,3 +2,8 @@ node_modules/
 dist/
 videos/
 video/
+bin/
+.env
+.env.local
+.env.dev
+.env.production

@@ -21,6 +21,9 @@ const path_1 = __importDefault(require("path"));
 exports.videoRouter = express_1.default.Router();
 exports.videoRouter.use((0, cors_1.default)());
 exports.videoRouter.use(express_1.default.json());
+exports.videoRouter.get('/test', (req, res) => {
+    res.json({ user: req.user });
+});
 exports.videoRouter.post('/startDownload', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { youtubeURL } = req.body;
     if (!youtubeURL) {
@@ -83,8 +86,10 @@ exports.videoRouter.post('/trim', (req, res) => __awaiter(void 0, void 0, void 0
             'error': "The combinedVideoPath doesnot Exist!!"
         });
     }
+    console.error('called', videoId, combinedVideoPath, startTime, endTime);
     try {
         const job = yield queue_1.trimQueue.add('trim-video', { startTime, endTime, combinedVideoPath, videoId });
+        console.log(job);
         res.json({ jobId: job.id });
     }
     catch (error) {
@@ -121,4 +126,14 @@ exports.videoRouter.post('/quality', (req, res) => __awaiter(void 0, void 0, voi
         console.error('❌ Failed to enqueue quality job:', error);
         res.status(500).json({ error: 'Failed to enqueue job' });
     }
+}));
+//track the quality process (final process)
+exports.videoRouter.get('/qualityJobStatus/:jobId', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const job = yield queue_1.qualityQueue.getJob(req.params.jobId);
+    if (!job) {
+        res.status(404).json({ error: 'Job not found' });
+    }
+    const state = yield job.getState();
+    const progress = job.progress;
+    res.json({ id: job.id, state, progress });
 }));

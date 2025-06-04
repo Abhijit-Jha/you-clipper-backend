@@ -20,6 +20,10 @@ const qualityQueue = new Worker(
         try {
             const result = await qualityVideo(resolution, aspectRatio, trimmedVideoPath, videoId);
             console.log(`🎥 Quality job done: ${result}`);
+            await job.updateProgress({
+                finalVideoPath : result
+                //Maybe a downloadable Link of appwriter
+            })
         } catch (error: any) {
             console.error(`❌ Error processing quality job ${job.id}:`, error.message || error);
             throw error;

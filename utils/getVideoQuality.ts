@@ -23,7 +23,7 @@ export async function qualityVideo(
   videoId: string
 ): Promise<string> {
   const currentPath = path.resolve();
-  const inputPath = path.join(currentPath, trimmedVideoPath);
+  const inputPath =path.isAbsolute(trimmedVideoPath)  ? trimmedVideoPath : path.join(currentPath, trimmedVideoPath);
   const outputPath = path.join(currentPath, 'videos', videoId, `${videoId}-${resolution}-${aspectRatio}.mp4`);
   const opPath = `${videoId}/${videoId}-${resolution}-${aspectRatio}.mp4`;
 

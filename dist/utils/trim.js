@@ -26,8 +26,10 @@ function trimVideo(_a) {
         const endTimeInSec = (0, convertToSeconds_1.convertToSeconds)(endTime);
         const duration = endTimeInSec - startTimeInSec;
         const currentPath = path_1.default.resolve();
-        console.log(combinedVideoPath, "Is the path recieced from frontend");
-        const inputPath = path_1.default.join(currentPath, combinedVideoPath);
+        console.log(combinedVideoPath, "Is the path recieced from frontend"); //videos/57ATmXx-uUk/combined-57ATmXx-uUk.mp4
+        const inputPath = path_1.default.isAbsolute(combinedVideoPath)
+            ? combinedVideoPath
+            : path_1.default.join(currentPath, combinedVideoPath);
         const outputPath = path_1.default.join(currentPath, 'videos', videoId, `${videoId}-s${startTimeInSec}-e${endTimeInSec}-trimmed.mp4`);
         const opPath = `videos/${videoId}/${videoId}-s${startTimeInSec}-e${endTimeInSec}-trimmed.mp4`;
         // Check if output file exists
@@ -52,7 +54,7 @@ function trimVideo(_a) {
                 .output(outputPath)
                 .on('end', () => {
                 console.log('✅ Trimming completed!');
-                resolve(outputPath);
+                resolve(opPath);
             })
                 .on('error', (err) => {
                 console.error('❌ FFmpeg error:', err.message);
