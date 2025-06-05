@@ -17,7 +17,6 @@ const fs_1 = __importDefault(require("fs"));
 const fluent_ffmpeg_1 = __importDefault(require("fluent-ffmpeg"));
 const ffmpeg_static_1 = __importDefault(require("ffmpeg-static"));
 const path_1 = __importDefault(require("path"));
-// Safety check for ffmpeg binary
 if (!ffmpeg_static_1.default) {
     throw new Error('❌ ffmpeg binary not found!');
 }
@@ -25,7 +24,15 @@ fluent_ffmpeg_1.default.setFfmpegPath(ffmpeg_static_1.default);
 function combineVideo(_a) {
     return __awaiter(this, arguments, void 0, function* ({ videoPath, audioPath, videoId }) {
         const currentPath = path_1.default.resolve();
-        const outputPath = path_1.default.join(currentPath, 'videos', `${videoId}`, `combined-${videoId}.mp4`);
+        const outputDir = path_1.default.join(currentPath, 'videos', videoId);
+        const outputPath = path_1.default.join(outputDir, `combined-${videoId}.mp4`);
+        // ✅ Check if combined output already exists
+        if (fs_1.default.existsSync(outputPath)) {
+            console.log('🟢 Combined file already exists. Skipping FFmpeg processing.');
+            return Promise.resolve({
+                outputPath: `videos/${videoId}/combined-${videoId}.mp4`,
+            });
+        }
         // ✅ Check if input files exist
         if (!fs_1.default.existsSync(audioPath))
             throw new Error('❌ Audio file not found');
@@ -42,7 +49,7 @@ function combineVideo(_a) {
                 .on('end', () => {
                 console.log('✅ Combined video + audio into:', outputPath);
                 resolve({
-                    outputPath: `videos/${videoId}/combined-${videoId}.mp4`
+                    outputPath: `videos/${videoId}/combined-${videoId}.mp4`,
                 });
             })
                 .on('error', (err) => {

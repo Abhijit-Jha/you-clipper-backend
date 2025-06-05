@@ -30,18 +30,28 @@ function ytDpl(_a) {
                 const ytDlpWrap = new yt_dlp_wrap_1.default(binaryPath);
                 ytDlpWrap.setBinaryPath(binaryPath);
                 const videoId = (0, videoId_1.extractVideoId)(youtubeURL);
-                const uniqueId = Math.floor(Math.random() * 10000);
+                const uniqueId = "abhi";
                 const outputDir = `./videos/${videoId}`;
                 const baseFilename = `${videoId}-${uniqueId}`;
                 if (!(0, fs_1.existsSync)(outputDir))
                     (0, fs_1.mkdirSync)(outputDir, { recursive: true });
                 const videoPath = path_1.default.join(outputDir, `${baseFilename}-video.mp4`);
                 const audioPath = path_1.default.join(outputDir, `${baseFilename}-audio.mp3`);
+                // ✅ If both files exist already, skip downloading
+                if ((0, fs_1.existsSync)(videoPath) && (0, fs_1.existsSync)(audioPath)) {
+                    console.log("Video & audio already exist. Skipping download.");
+                    return resolve({
+                        videoPath,
+                        audioPath,
+                        videoId,
+                        baseFilename,
+                    });
+                }
                 // Download video-only
                 const videoPromise = ytDlpWrap.execPromise([
                     youtubeURL,
                     "-f",
-                    "bv", // best video only
+                    "bv",
                     "-o",
                     videoPath,
                     "--no-playlist",
@@ -50,7 +60,7 @@ function ytDpl(_a) {
                 const audioPromise = ytDlpWrap.execPromise([
                     youtubeURL,
                     "-f",
-                    "ba", // best audio only
+                    "ba",
                     "-o",
                     audioPath,
                     "--no-playlist",

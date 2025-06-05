@@ -21,7 +21,8 @@ const qualityQueue = new Worker(
             const result = await qualityVideo(resolution, aspectRatio, trimmedVideoPath, videoId);
             console.log(`🎥 Quality job done: ${result}`);
             await job.updateProgress({
-                finalVideoPath : result
+                finalVideoPath: result.outputPath,
+                fileId: result.fileId //File id of appwrite
                 //Maybe a downloadable Link of appwriter
             })
         } catch (error: any) {

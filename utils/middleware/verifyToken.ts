@@ -21,7 +21,7 @@ declare module 'express-serve-static-core' {
 
 export const authenticate = (req: Request, res: Response, next: NextFunction) => {
     const authHeader = req.headers.authorization;
-    console.log(authHeader)
+    // console.log(authHeader)
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
         res.status(401).json({ error: "Unauthorized: No token provided" });
         return;

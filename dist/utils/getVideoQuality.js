@@ -19,6 +19,7 @@ const ffmpeg_static_1 = __importDefault(require("ffmpeg-static"));
 const path_1 = __importDefault(require("path"));
 const qualityMap_1 = require("../helper/qualityMap");
 const aspectRatioMap_1 = require("../helper/aspectRatioMap");
+const createFile_1 = require("./storage/createFile");
 if (!ffmpeg_static_1.default) {
     throw new Error('❌ ffmpeg binary not found!');
 }
@@ -67,7 +68,19 @@ function qualityVideo(resolution, aspectRatio, trimmedVideoPath, videoId) {
             })
                 .on('end', () => {
                 console.log('✅ Video processing done');
-                resolve(opPath);
+                // Run the async operation outside the event callback
+                (() => __awaiter(this, void 0, void 0, function* () {
+                    try {
+                        const data = yield (0, createFile_1.uploadVideoToAppwrite)(outputPath);
+                        resolve({
+                            outputPath: opPath,
+                            fileId: data.$id
+                        });
+                    }
+                    catch (err) {
+                        reject(err);
+                    }
+                }))();
             })
                 .on('error', (err) => {
                 console.error('❌ FFmpeg error:', err.message);

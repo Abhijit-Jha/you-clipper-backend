@@ -6,7 +6,7 @@ import { extractVideoId } from "../helper/videoId";
 export interface YtDplResult {
   videoPath: string;
   audioPath: string;
-  videoId: string ;
+  videoId: string;
   baseFilename: string;
 }
 
@@ -25,7 +25,7 @@ export async function ytDpl({ youtubeURL }: { youtubeURL: string }): Promise<YtD
       ytDlpWrap.setBinaryPath(binaryPath);
 
       const videoId = extractVideoId(youtubeURL);
-      const uniqueId = Math.floor(Math.random() * 10000);
+      const uniqueId = "abhi";
       const outputDir = `./videos/${videoId}`;
       const baseFilename = `${videoId}-${uniqueId}`;
 
@@ -34,11 +34,22 @@ export async function ytDpl({ youtubeURL }: { youtubeURL: string }): Promise<YtD
       const videoPath = path.join(outputDir, `${baseFilename}-video.mp4`);
       const audioPath = path.join(outputDir, `${baseFilename}-audio.mp3`);
 
+      // ✅ If both files exist already, skip downloading
+      if (existsSync(videoPath) && existsSync(audioPath)) {
+        console.log("Video & audio already exist. Skipping download.");
+        return resolve({
+          videoPath,
+          audioPath,
+          videoId,
+          baseFilename,
+        });
+      }
+
       // Download video-only
       const videoPromise = ytDlpWrap.execPromise([
         youtubeURL,
         "-f",
-        "bv", // best video only
+        "bv",
         "-o",
         videoPath,
         "--no-playlist",
@@ -48,7 +59,7 @@ export async function ytDpl({ youtubeURL }: { youtubeURL: string }): Promise<YtD
       const audioPromise = ytDlpWrap.execPromise([
         youtubeURL,
         "-f",
-        "ba", // best audio only
+        "ba",
         "-o",
         audioPath,
         "--no-playlist",

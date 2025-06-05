@@ -4,6 +4,7 @@ import ffmpegPath from 'ffmpeg-static';
 import path from 'path';
 import { qualityMap } from '../helper/qualityMap';
 import { aspectRatioMap } from '../helper/aspectRatioMap';
+import { uploadVideoToAppwrite } from './storage/createFile';
 
 if (!ffmpegPath) {
   throw new Error('❌ ffmpeg binary not found!');
@@ -21,9 +22,12 @@ export async function qualityVideo(
   aspectRatio: keyof typeof aspectRatioMap,
   trimmedVideoPath: string,
   videoId: string
-): Promise<string> {
+): Promise<{
+  outputPath: string,
+  fileId: string
+}> {
   const currentPath = path.resolve();
-  const inputPath =path.isAbsolute(trimmedVideoPath)  ? trimmedVideoPath : path.join(currentPath, trimmedVideoPath);
+  const inputPath = path.isAbsolute(trimmedVideoPath) ? trimmedVideoPath : path.join(currentPath, trimmedVideoPath);
   const outputPath = path.join(currentPath, 'videos', videoId, `${videoId}-${resolution}-${aspectRatio}.mp4`);
   const opPath = `${videoId}/${videoId}-${resolution}-${aspectRatio}.mp4`;
 
@@ -35,6 +39,13 @@ export async function qualityVideo(
   }
   if (!fs.existsSync(inputPath)) {
     throw new Error(`❌ Input file not found at ${inputPath}`);
+  }
+
+  // **Check if output already exists**
+  if (fs.existsSync(outputPath)) {
+    console.log(`⚠️ Output video already exists at ${outputPath}, skipping processing.`);
+    const data = await uploadVideoToAppwrite(outputPath);
+    return { outputPath: opPath, fileId: data.$id };
   }
 
   // Extract width and height from resolution
@@ -64,7 +75,17 @@ export async function qualityVideo(
       })
       .on('end', () => {
         console.log('✅ Video processing done');
-        resolve(opPath);
+        (async () => {
+          try {
+            const data = await uploadVideoToAppwrite(outputPath);
+            resolve({
+              outputPath: opPath,
+              fileId: data.$id
+            });
+          } catch (err) {
+            reject(err);
+          }
+        })();
       })
       .on('error', (err) => {
         console.error('❌ FFmpeg error:', err.message);
