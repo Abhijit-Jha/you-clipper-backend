@@ -44,6 +44,12 @@ function qualityVideo(resolution, aspectRatio, trimmedVideoPath, videoId) {
         if (!fs_1.default.existsSync(inputPath)) {
             throw new Error(`❌ Input file not found at ${inputPath}`);
         }
+        // **Check if output already exists**
+        if (fs_1.default.existsSync(outputPath)) {
+            console.log(`⚠️ Output video already exists at ${outputPath}, skipping processing.`);
+            const data = yield (0, createFile_1.uploadVideoToAppwrite)(outputPath);
+            return { outputPath: opPath, fileId: data.$id };
+        }
         // Extract width and height from resolution
         const [targetWidth, targetHeight] = qualityMap_1.qualityMap[resolution].split('x').map(Number);
         const { w: arW, h: arH } = parseAspectRatio(aspectRatioMap_1.aspectRatioMap[aspectRatio]);
@@ -68,7 +74,6 @@ function qualityVideo(resolution, aspectRatio, trimmedVideoPath, videoId) {
             })
                 .on('end', () => {
                 console.log('✅ Video processing done');
-                // Run the async operation outside the event callback
                 (() => __awaiter(this, void 0, void 0, function* () {
                     try {
                         const data = yield (0, createFile_1.uploadVideoToAppwrite)(outputPath);
