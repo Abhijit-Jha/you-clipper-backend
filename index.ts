@@ -7,7 +7,10 @@ import './cronjob' //CronJob to delete videos at midnight 12:00
 const app = express();
 
 app.use(express.json());
-app.use(cors())
+app.use(cors());
+app.get('/health',(req,res)=>{
+    res.send('Alive');
+});
 app.use('/api/video', authenticate, videoRouter);
 app.use('/api/queue', authenticate, queueRouter);
 app.listen(3001, () => {
