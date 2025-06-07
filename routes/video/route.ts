@@ -23,7 +23,6 @@ videoRouter.post('/startDownload', async (req: Request, res: Response) => {
     try {
         const job = await downloadQueue.add('start-download', { youtubeURL });
         console.log('Download Job added');
-
         res.json({ jobId: job.id });
     } catch (error) {
         console.error(error);
@@ -35,7 +34,10 @@ videoRouter.post('/startDownload', async (req: Request, res: Response) => {
 videoRouter.get('/downloadStatus/:jobId', async (req, res) => {
     const job = await downloadQueue.getJob(req.params.jobId);
 
-    if (!job) res.status(404).json({ error: 'Job not found' });
+    if (!job) {
+        res.status(404).json({ error: 'Job not found' });
+        return;
+    }
 
     const state = await job.getState();  // e.g. 'waiting', 'active', 'completed', 'failed'
     const progress = job.progress;
@@ -51,6 +53,7 @@ videoRouter.get('/combineStatus/:jobId', async (req: Request, res: Response) => 
 
     if (!job) {
         res.status(404).json({ error: 'Download job not found' });
+        return;
     }
 
     const downloadProgress = job.progress as { combineJobId?: string };
@@ -67,6 +70,7 @@ videoRouter.get('/combineStatus/:jobId', async (req: Request, res: Response) => 
 
     if (!combineJob) {
         res.status(404).json({ error: 'Combine job not found' });
+        return;
     }
 
     const state = await combineJob.getState();  // Correct job here
@@ -90,6 +94,7 @@ videoRouter.post('/trim', async (req: Request, res: Response) => {
         res.json({
             'error': "The combinedVideoPath doesnot Exist!!"
         });
+        return;
     }
     console.error('called', videoId, combinedVideoPath, startTime, endTime);
     try {
@@ -108,7 +113,10 @@ videoRouter.post('/trim', async (req: Request, res: Response) => {
 videoRouter.get('/trimStatus/:jobId', async (req, res) => {
     const job = await trimQueue.getJob(req.params.jobId);
 
-    if (!job) res.status(404).json({ error: 'Job not found' });
+    if (!job){
+        res.status(404).json({ error: 'Job not found' });
+        return;
+    } 
 
     const state = await job.getState();  // e.g. 'waiting', 'active', 'completed', 'failed'
     const progress = job.progress;
@@ -123,13 +131,15 @@ videoRouter.get('/trimStatus/:jobId', async (req, res) => {
 videoRouter.post('/quality', async (req: Request, res: Response) => {
     const { trimmedVideoPath, videoId } = req.body;
     const { resolution, aspectRatio } = req.query as { resolution?: string; aspectRatio?: string };
-    console.log("Hello from quality",resolution,aspectRatio,trimmedVideoPath,videoId);
+    console.log("Hello from quality", resolution, aspectRatio, trimmedVideoPath, videoId);
     if (!trimmedVideoPath || !videoId) {
         res.status(400).json({ error: 'trimmedVideoPath and videoId are required' });
+        return;
     }
 
     if (!resolution || !aspectRatio) {
         res.status(400).json({ error: 'resolution and aspectRatio are required query parameters' });
+        return;
     }
 
     try {
@@ -147,6 +157,7 @@ videoRouter.get('/qualityJobStatus/:jobId', async (req: Request, res: Response) 
     const job = await qualityQueue.getJob(req.params.jobId);
     if (!job) {
         res.status(404).json({ error: 'Job not found' });
+        return;
     }
     const state = await job.getState();
     const progress = job.progress;
