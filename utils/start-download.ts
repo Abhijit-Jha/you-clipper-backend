@@ -16,13 +16,13 @@ export async function ytDpl({ youtubeURL }: { youtubeURL: string }): Promise<YtD
       const platform = process.platform;
       const isWindows = platform === "win32";
       const binaryPath = `./bin/yt-dlp${isWindows ? ".exe" : ""}`;
+      const cookiePath = path.resolve('cookies/youtube-cookies.txt');
 
       if (!existsSync("./bin")) mkdirSync("./bin");
 
       if (!existsSync(binaryPath)) {
         await YTDlpWrap.downloadFromGithub(binaryPath, "2025.05.22", platform);
       }
-
 
 
       const ytDlpWrap = new YTDlpWrap(binaryPath);
@@ -61,8 +61,9 @@ export async function ytDpl({ youtubeURL }: { youtubeURL: string }): Promise<YtD
         "-o",
         videoPath,
         "--no-playlist",
+        "--cookies",cookiePath
       ]);
-
+      
       // Download audio-only
       const audioPromise = ytDlpWrap.execPromise([
         youtubeURL,
@@ -71,6 +72,7 @@ export async function ytDpl({ youtubeURL }: { youtubeURL: string }): Promise<YtD
         "-o",
         audioPath,
         "--no-playlist",
+        "--cookies",cookiePath
       ]);
 
       await Promise.all([videoPromise, audioPromise]);
