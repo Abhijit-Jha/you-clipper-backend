@@ -12,7 +12,7 @@ app.use(express.json());
 app.use(cors());
 
 
-app.use('/api/video', videoRouter);
+app.use('/api/video',authenticate, videoRouter);
 app.use('/api/queue', authenticate, queueRouter);
 
 app.listen(PORT, () => {
