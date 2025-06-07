@@ -20,6 +20,7 @@ queueRouter.post('/status/:jobId', async (req, res) => {
         const downloadJob = await downloadQueue.getJob(jobId);
         if (!downloadJob) {
             res.status(404).json({ message: "Download job not found" });
+            return;
         }
 
         const downloadState = await downloadJob.getState();
@@ -43,6 +44,7 @@ queueRouter.post('/status/:jobId', async (req, res) => {
                     statusOfYourJob: "active",
                     qualityJobStatus: "unknown",
                 });
+                return;
             }
 
             const qualityJob = await qualityQueue.getJob(qualityJobId);
@@ -54,6 +56,7 @@ queueRouter.post('/status/:jobId', async (req, res) => {
                         statusOfYourJob: "active",
                         qualityJobStatus: qualityState,
                     });
+
                 }
             } else {
                 res.json({

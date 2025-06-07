@@ -16,7 +16,7 @@ const qualityQueue = new Worker(
     'change-quality',
     async (job) => {
         const { trimmedVideoPath, aspectRatio, resolution, videoId } = job.data;
-
+        console.log(trimmedVideoPath,aspectRatio,resolution,videoId,"From qq endpoint");
         try {
             const result = await qualityVideo(resolution, aspectRatio, trimmedVideoPath, videoId);
             console.log(`🎥 Quality job done: ${result}`);

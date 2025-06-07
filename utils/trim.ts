@@ -28,7 +28,7 @@ export async function trimVideo({ startTime, endTime, combinedVideoPath, videoId
     // - delete the old file before processing
     // - or reject with an error
     // Here, let's just return the path to avoid re-processing
-    return outputPath;
+    return opPath;
   } catch {
     // File doesn't exist, proceed with trimming
   }

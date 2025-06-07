@@ -17,10 +17,13 @@ videoRouter.post('/startDownload', async (req: Request, res: Response) => {
 
     if (!youtubeURL) {
         res.status(400).json({ error: 'youtubeURL missing' });
+        return;
     }
 
     try {
         const job = await downloadQueue.add('start-download', { youtubeURL });
+        console.log('Download Job added');
+
         res.json({ jobId: job.id });
     } catch (error) {
         console.error(error);
@@ -120,7 +123,7 @@ videoRouter.get('/trimStatus/:jobId', async (req, res) => {
 videoRouter.post('/quality', async (req: Request, res: Response) => {
     const { trimmedVideoPath, videoId } = req.body;
     const { resolution, aspectRatio } = req.query as { resolution?: string; aspectRatio?: string };
-
+    console.log("Hello from quality",resolution,aspectRatio,trimmedVideoPath,videoId);
     if (!trimmedVideoPath || !videoId) {
         res.status(400).json({ error: 'trimmedVideoPath and videoId are required' });
     }
@@ -131,6 +134,7 @@ videoRouter.post('/quality', async (req: Request, res: Response) => {
 
     try {
         const job = await qualityQueue.add('change-quality', { resolution, aspectRatio, trimmedVideoPath, videoId });
+        console.log("Quality QUeue added ")
         res.json({ jobId: job.id });
     } catch (error) {
         console.error('❌ Failed to enqueue quality job:', error);
@@ -144,7 +148,7 @@ videoRouter.get('/qualityJobStatus/:jobId', async (req: Request, res: Response) 
     if (!job) {
         res.status(404).json({ error: 'Job not found' });
     }
-    const state = await job.getState();  
+    const state = await job.getState();
     const progress = job.progress;
 
     res.json({ id: job.id, state, progress });

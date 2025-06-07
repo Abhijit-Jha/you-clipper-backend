@@ -19,7 +19,11 @@ export async function ytDpl({ youtubeURL }: { youtubeURL: string }): Promise<YtD
 
       if (!existsSync("./bin")) mkdirSync("./bin");
 
-      await YTDlpWrap.downloadFromGithub(binaryPath, "2025.05.22", platform);
+      if (!existsSync(binaryPath)) {
+        await YTDlpWrap.downloadFromGithub(binaryPath, "2025.05.22", platform);
+      }
+
+
 
       const ytDlpWrap = new YTDlpWrap(binaryPath);
       ytDlpWrap.setBinaryPath(binaryPath);
@@ -34,6 +38,10 @@ export async function ytDpl({ youtubeURL }: { youtubeURL: string }): Promise<YtD
       const videoPath = path.join(outputDir, `${baseFilename}-video.mp4`);
       const audioPath = path.join(outputDir, `${baseFilename}-audio.mp3`);
 
+
+      console.log("➡️ Starting download for", youtubeURL);
+      console.log("Binary path:", binaryPath);
+      console.log("Output paths:", videoPath, audioPath);
       // ✅ If both files exist already, skip downloading
       if (existsSync(videoPath) && existsSync(audioPath)) {
         console.log("Video & audio already exist. Skipping download.");
