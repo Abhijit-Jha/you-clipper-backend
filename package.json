@@ -29,6 +29,7 @@
     "ioredis": "^5.6.1",
     "jsonwebtoken": "^9.0.2",
     "node-appwrite": "^12.0.1",
+    "node-cron": "^4.1.0",
     "you-clipper-backend": "file:",
     "yt-dlp-wrap": "^2.3.12"
   },

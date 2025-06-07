@@ -25,7 +25,8 @@ module.exports = {
         name: "qualityWorker",
         script: "dist/workers/qualityWorker.js",  // Worker file (compiled)
         watch: false,
-      }
+      },
+      
     ]
   }
   

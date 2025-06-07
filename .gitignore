@@ -1,9 +1,15 @@
+# Node dependencies
 node_modules/
+
+# Build output
 dist/
-dist
+bin/
+
+# Media folders (optional, see note below)
 videos/
 video/
-bin/
+
+# Environment variable files
 .env
 .env.local
 .env.dev

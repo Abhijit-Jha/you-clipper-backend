@@ -8,6 +8,7 @@ const route_1 = require("./routes/video/route");
 const verifyToken_1 = require("./utils/middleware/verifyToken");
 const cors_1 = __importDefault(require("cors"));
 const route_2 = require("./routes/queue/route");
+require("./cronjob");
 const app = (0, express_1.default)();
 // Add this to parse JSON body before routes
 app.use(express_1.default.json());
