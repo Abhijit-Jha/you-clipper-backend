@@ -1,19 +1,10 @@
 import { Worker } from 'bullmq';
 import { ytDpl } from '../utils/start-download';  // your function file
 import dotenv from 'dotenv';
-
 dotenv.config();
+import { connection } from '../utils/redis/redis';
 
-import IORedis from 'ioredis';
-import { combineVideo } from '../utils/combine';
 import { combineQueue } from '../utils/queue/queue';
-
-const connection = new IORedis({
-    host: process.env.REDIS_HOST,
-    port: Number(process.env.REDIS_PORT),
-    password: process.env.REDIS_PASSWORD,
-    maxRetriesPerRequest: null,
-});
 
 
 const worker = new Worker(
@@ -22,10 +13,27 @@ const worker = new Worker(
         console.log(`Processing job ${job.id} for URL: ${job.data.youtubeURL}`);
         try {
             const { videoPath, audioPath, videoId } = await ytDpl({ youtubeURL: job.data.youtubeURL });
+            console.log('✅ Download completed:', { videoPath, audioPath, videoId });
+
+            // Add combine job
+            console.log('🔄 Adding job to combine queue...');
             const combineJob = await combineQueue.add('combine-queue', { videoPath, audioPath, videoId });
-            await job.updateProgress({ combineJobId: combineJob.id, videoPath,audioPath,videoId }); //This will update the Jobid to track the combine progress
+            console.log('✅ Combine job added successfully:', {
+                combineJobId: combineJob.id,
+                combineJobData: combineJob.data
+            });
+
+            // Update progress
+            await job.updateProgress({
+                combineJobId: combineJob.id,
+                videoPath,
+                audioPath,
+                videoId
+            });
+            console.log('✅ Progress updated with combine job ID');
+
         } catch (error) {
-            console.error(`Job ${job.id} failed:`, error);
+            console.error(`❌ Job ${job.id} failed:`, error);
             throw error;
         }
     },
@@ -33,7 +41,6 @@ const worker = new Worker(
         connection
     }
 );
-
 
 
 worker.on('completed', (job) => {

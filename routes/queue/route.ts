@@ -56,7 +56,7 @@ queueRouter.post('/status/:jobId', async (req, res) => {
                         statusOfYourJob: "active",
                         qualityJobStatus: qualityState,
                     });
-
+                    
                 }
             } else {
                 res.json({
