@@ -3,8 +3,8 @@ import { videoRouter } from "./routes/video/route";
 import { authenticate } from "./utils/middleware/verifyToken";
 import cors from "cors"
 import { queueRouter } from "./routes/queue/route";
-import { downloadQueue } from "./utils/queue/queue";
-// import './cronjob' //CronJob to delete videos at midnight 12:00
+//Comment it if you dont want to delete the videos 
+import './cronjob' //CronJob to delete videos at midnight 12:00
 const app = express();
 const PORT = process.env.PORT || 3001;
 
@@ -19,9 +19,3 @@ app.listen(PORT, () => {
     console.log(`Server started on port ${PORT}`);
 });
 
-
-// async function drainJobs(){
-//     await downloadQueue.drain();
-// }
-
-// drainJobs().then(()=>console.log('HEHHE'))

@@ -1,6 +1,5 @@
 import { Queue } from 'bullmq';
 import dotenv from 'dotenv'
-import Redis from 'ioredis';
 dotenv.config();
 import { connection } from '../redis/redis';
 

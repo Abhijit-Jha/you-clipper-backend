@@ -61,7 +61,7 @@ export async function ytDpl({ youtubeURL }: { youtubeURL: string }): Promise<YtD
         "-o",
         videoPath,
         "--no-playlist",
-        "--cookies",cookiePath
+        // "--cookies",cookiePath
       ]);
       
       // Download audio-only
@@ -72,7 +72,7 @@ export async function ytDpl({ youtubeURL }: { youtubeURL: string }): Promise<YtD
         "-o",
         audioPath,
         "--no-playlist",
-        "--cookies",cookiePath
+        // "--cookies",cookiePath
       ]);
 
       await Promise.all([videoPromise, audioPromise]);
